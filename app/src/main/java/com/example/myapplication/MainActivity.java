@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.DatePickerDialog;
@@ -30,21 +31,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private int choseYear, choseMonth, choseDate;
     private int setYear, setMonth, setDay;
     private TextView dateChoose, dateAdd;
-    private List<String> types = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        types.add("Receiving");
-        types.add("Dinning");
-        types.add("Grocery");
-        types.add("Entertainment");
-        types.add("Electronics");
-        types.add("Transportation");
-        types.add("Clothing");
-        types.add("Others");
 
         currYear = Calendar.getInstance().get(Calendar.YEAR);
         currMonth = Calendar.getInstance().get(Calendar.MONTH);
@@ -96,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         typeAdd = addDialog.findViewById(R.id.spinner3);
         typeAdd.setOnItemSelectedListener(this);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, types);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, new Type().types);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         typeAdd.setAdapter(adapter);
 
@@ -165,29 +156,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         none.setVisibility(View.GONE);
                         if (search.getType() > 0) {
                             spend.setVisibility(View.VISIBLE);
-                            View chunk = getLayoutInflater().inflate(R.layout.chunk_item, spending, false);
-                            TextView event = chunk.findViewById(R.id.event);
-                            TextView detail = chunk.findViewById(R.id.detail);
-                            TextView money = chunk.findViewById(R.id.money);
-                            event.setText(search.getTitle());
-                            detail.setText(search.getDetail());
-                            money.setText(String.valueOf(search.getAmount()));
-                            chunk.setOnClickListener(v -> {
-                                addDialog.setContentView(R.layout.popup_info);
-
-                                addDialog.show();
-                            });
-                            spending.addView(chunk);
+                            loadChunk(spending, search);
                         } else {
                             receive.setVisibility(View.VISIBLE);
-                            View chunk = getLayoutInflater().inflate(R.layout.chunk_item, receiving, false);
-                            TextView event = chunk.findViewById(R.id.event);
-                            TextView detail = chunk.findViewById(R.id.detail);
-                            TextView money = chunk.findViewById(R.id.money);
-                            event.setText(search.getTitle());
-                            detail.setText(search.getDetail());
-                            money.setText(String.valueOf(search.getAmount()));
-                            receiving.addView(chunk);
+                            loadChunk(receiving, search);
                         }
                     }
                 }
@@ -202,4 +174,35 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) { }
     public void onNothingSelected(AdapterView<?> arg0) { }
+    public void loadChunk(LinearLayout toAdd, Store item) {
+        View chunk = getLayoutInflater().inflate(R.layout.chunk_item, toAdd, false);
+        TextView event = chunk.findViewById(R.id.event);
+        TextView detail = chunk.findViewById(R.id.detail);
+        TextView money = chunk.findViewById(R.id.money);
+        event.setText(item.getTitle());
+        detail.setText(item.getDetail());
+        money.setText(String.valueOf(item.getAmount()));
+        chunk.setOnClickListener(v -> {
+            addDialog.setContentView(R.layout.popup_info);
+            TextView title = addDialog.findViewById(R.id.textView5);
+            TextView amount = addDialog.findViewById(R.id.textView11);
+            TextView type = addDialog.findViewById(R.id.textView13);
+            TextView description = addDialog.findViewById(R.id.textView15);
+            Button delete = addDialog.findViewById(R.id.button4);
+            title.setText(item.getTitle());
+            amount.setText(String.valueOf(item.getAmount()));
+            type.setText(new Type().getType(item.getType()));
+            description.setText(item.getDetail());
+            delete.setOnClickListener(v1 -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("Are you sure to delete?");
+                builder.setPositiveButton("YES", (unused1, unused2) -> data.remove(item));
+                builder.setNegativeButton("NO", null);
+                builder.create().show();
+                addDialog.dismiss();
+            });
+            addDialog.show();
+        });
+        toAdd.addView(chunk);
+    }
 }
