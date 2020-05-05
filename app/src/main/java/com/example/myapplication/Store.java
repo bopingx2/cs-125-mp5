@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Store.
@@ -10,8 +11,8 @@ public class Store {
     private int amount;
     private int type;
     private String detail;
-    private Calendar date;
-    public Store(String setTitle, int setAmount, int setType, String setDetail, Calendar setDate) {
+    private Date date;
+    public Store(String setTitle, int setAmount, int setType, String setDetail, Date setDate) {
         title = setTitle;
         amount = setAmount;
         detail = setDetail;
@@ -35,7 +36,7 @@ public class Store {
         return detail;
     }
 
-    public Calendar getDate() {
+    public Date getDate() {
         return date;
     }
 }
