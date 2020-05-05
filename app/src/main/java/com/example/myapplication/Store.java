@@ -8,23 +8,29 @@ import java.util.Date;
  */
 public class Store {
     private String title;
-    private int amount;
+    private double amount;
     private int type;
     private String detail;
-    private Date date;
-    public Store(String setTitle, int setAmount, int setType, String setDetail, Date setDate) {
+    private int year;
+    private int month;
+    private int date;
+    public Store(String setTitle, double setAmount, int setType, String setDetail, int setYear, int setMonth, int setDate) {
         title = setTitle;
         amount = setAmount;
         detail = setDetail;
         type = setType;
         detail = setDetail;
+        year = setYear;
+        month = setMonth;
         date = setDate;
     }
+    public Store() { }
 
     public String getTitle() {
         return title;
     }
-    public int getAmount(){
+
+    public double getAmount(){
         return amount;
     }
 
@@ -36,7 +42,11 @@ public class Store {
         return detail;
     }
 
-    public Date getDate() {
-        return date;
+    public int getYear() {
+        return year;
     }
+
+    public int getMonth() { return month; }
+
+    public int getDate() { return date; }
 }
