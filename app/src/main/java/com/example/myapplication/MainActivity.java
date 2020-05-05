@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private int choseYear, choseMonth, choseDate;
     private int setYear, setMonth, setDay;
     private TextView dateChoose, dateAdd;
+    private final String FILE = "data.json";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,12 +54,23 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         dateChoose = findViewById(R.id.textView4);
         String currTime = String.format("%d/%d/%d", currMonth + 1, currDate, currYear);
         dateChoose.setText(currTime);
-
+        showItem(choseYear, choseMonth, choseDate);
         addButton.setOnClickListener(v -> {
             ShowAddPopup();
         });
         overviewButton.setOnClickListener(v -> {
             Intent overview = new Intent(this, OverviewActivity.class);
+            overview.putExtra("size", data.size());
+            for (int i = 0; i < data.size(); i++) {
+                Store read = data.get(i);
+                overview.putExtra("title" + i, read.getTitle());
+                overview.putExtra("amount" + i, read.getAmount());
+                overview.putExtra("type" + i, read.getType());
+                overview.putExtra("detail" + i, read.getDetail());
+                overview.putExtra("year" + i, read.getYear());
+                overview.putExtra("month" + i, read.getMonth());
+                overview.putExtra("date" + i, read.getDate());
+            }
             startActivity(overview);
         });
         dateChoose.setOnClickListener(v -> {
@@ -69,14 +81,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     choseDate = dayOfMonth;
                     choseMonth = month;
                     String d = String.format("%d/%d/%d", month + 1, dayOfMonth, year);
+                    showItem(choseYear, choseMonth, choseDate);
                     dateChoose.setText(d);
                 }
             }, currYear, currMonth, currDate);
             datePick.show();
         });
-
-        showItem(choseYear, choseMonth, choseDate);
-
     }
     public void ShowAddPopup() {
         setYear = currYear;
@@ -120,7 +130,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         done.setOnClickListener(v -> {
             String setTitle = titleAdd.getText().toString();
-            double setAmount = Double.valueOf(amountAdd.getText().toString());
+            double setAmount;
+            try {
+                setAmount = Double.valueOf(amountAdd.getText().toString());
+            } catch (Exception e) {
+                setAmount = 0.0;
+            }
             String setStrType = typeAdd.getSelectedItem().toString();
             int setType = new Type().getType(setStrType);
             String setDetail = descriptionAdd.getText().toString();
@@ -174,6 +189,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) { }
     public void onNothingSelected(AdapterView<?> arg0) { }
+
     public void loadChunk(LinearLayout toAdd, Store item) {
         View chunk = getLayoutInflater().inflate(R.layout.chunk_item, toAdd, false);
         TextView event = chunk.findViewById(R.id.event);
@@ -201,6 +217,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 builder.create().show();
                 addDialog.dismiss();
             });
+
             addDialog.show();
         });
         toAdd.addView(chunk);

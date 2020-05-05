@@ -1,12 +1,9 @@
 package com.example.myapplication;
 
-import java.util.Calendar;
-import java.util.Date;
-
 /**
  * Store.
  */
-public class Store {
+public class Store{
     private String title;
     private double amount;
     private int type;
@@ -24,7 +21,6 @@ public class Store {
         month = setMonth;
         date = setDate;
     }
-    public Store() { }
 
     public String getTitle() {
         return title;
