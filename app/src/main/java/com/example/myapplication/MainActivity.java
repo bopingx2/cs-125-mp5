@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private int choseYear, choseMonth, choseDate;
     private int setYear, setMonth, setDay;
     private TextView dateChoose, dateAdd;
-    private DocumentReference doc;
+    private static DocumentReference doc;
 
 
     @Override
@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         setContentView(R.layout.activity_main);
 
         Intent login = getIntent();
+        System.out.println(login.getStringExtra("user"));
         doc = FirebaseFirestore.getInstance().document("data/" + login.getStringExtra("user"));
 
         currYear = Calendar.getInstance().get(Calendar.YEAR);
@@ -74,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         String currTime = String.format("%d/%d/%d", currMonth + 1, currDate, currYear);
         dateChoose.setText(currTime);
 
+        data.clear();
         loadData();
 
         showItem(choseYear, choseMonth, choseDate);
@@ -257,7 +259,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setMessage("Are you sure to delete?");
                 builder.setPositiveButton("YES", (unused1, unused2) -> {
+                    Map<String, Store> save = new HashMap<String, Store>();
                     data.remove(item);
+                    for (int i = 0; i < data.size(); i++) {
+                        save.put(String.valueOf(i), data.get(i));
+                    }
+                    doc.set(save).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Log.d("Store", "Success");
+                            } else {
+                                Log.w("Store", "Fail");
+                            }
+                        }
+                    });
                     addDialog.dismiss();
                     showItem(this.choseYear, this.choseMonth, this.choseDate);
                 });
