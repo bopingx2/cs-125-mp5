@@ -8,6 +8,7 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -20,8 +21,10 @@ import android.widget.TextView;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -40,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private int choseYear, choseMonth, choseDate;
     private int setYear, setMonth, setDay;
     private TextView dateChoose, dateAdd;
+    private DocumentReference doc;
 
 
     @Override
@@ -48,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         setContentView(R.layout.activity_main);
 
         Intent login = getIntent();
-        DocumentReference doc = FirebaseFirestore.getInstance().document("data/" + login.getStringExtra("user"));
+        doc = FirebaseFirestore.getInstance().document("data/" + login.getStringExtra("user"));
 
         currYear = Calendar.getInstance().get(Calendar.YEAR);
         currMonth = Calendar.getInstance().get(Calendar.MONTH);
@@ -69,6 +73,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         dateChoose = findViewById(R.id.textView4);
         String currTime = String.format("%d/%d/%d", currMonth + 1, currDate, currYear);
         dateChoose.setText(currTime);
+
+        loadData();
+
         showItem(choseYear, choseMonth, choseDate);
         addButton.setOnClickListener(v -> {
             ShowAddPopup();
@@ -166,7 +173,19 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             String setDetail = descriptionAdd.getText().toString();
             Store store = new Store(setTitle, setAmount, setType, setDetail, setYear, setMonth, setDay);
             data.add(store);
-
+            for (int i = 0; i < data.size(); i++) {
+                save.put(String.valueOf(i), data.get(i));
+            }
+            doc.set(save).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        Log.d("Store", "Success");
+                    } else {
+                        Log.w("Store", "Fail");
+                    }
+                }
+            });
             showItem(choseYear, choseMonth, choseDate);
             addDialog.dismiss();
         });
@@ -250,4 +269,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         });
         toAdd.addView(chunk);
     }
+
+    public void loadData() {
+        doc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
+                    Map<String, Object> cloud = documentSnapshot.getData();
+                    for (Map.Entry<String, Object> entry : cloud.entrySet()) {
+                        Map<String, Object> m = (HashMap) entry.getValue();
+                        Store store = new Store(m);
+                        data.add(store);
+                    }
+                }
+            }
+        });
+    }
+
 }
