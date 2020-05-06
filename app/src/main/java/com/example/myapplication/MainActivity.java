@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,16 +18,21 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private Dialog addDialog;
-    private Button addButton, overviewButton, done;
+    private Button addButton, overviewButton, done, logout;
     private EditText titleAdd, amountAdd, descriptionAdd;
     private Spinner typeAdd;
     private static List<Store> data = new ArrayList<>();
@@ -34,17 +40,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private int choseYear, choseMonth, choseDate;
     private int setYear, setMonth, setDay;
     private TextView dateChoose, dateAdd;
-    private Intent login = getIntent();
-    //private DocumentReference doc = FirebaseFirestore.getInstance().document("data/" + login.getStringExtra("user"));
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Intent login = getIntent();
+        DocumentReference doc = FirebaseFirestore.getInstance().document("data/" + login.getStringExtra("user"));
+
         currYear = Calendar.getInstance().get(Calendar.YEAR);
         currMonth = Calendar.getInstance().get(Calendar.MONTH);
         currDate = Calendar.getInstance().get(Calendar.DATE);
+
+        Intent intent = new Intent(this, LoginActivity.class);
 
         choseYear = currYear;
         choseMonth = currMonth;
@@ -54,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         addButton = findViewById(R.id.button);
         overviewButton = findViewById(R.id.button2);
+        logout = findViewById(R.id.button6);
 
         dateChoose = findViewById(R.id.textView4);
         String currTime = String.format("%d/%d/%d", currMonth + 1, currDate, currYear);
@@ -90,6 +101,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 }
             }, currYear, currMonth, currDate);
             datePick.show();
+        });
+        logout.setOnClickListener(v -> {
+            AuthUI.getInstance().signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    startActivity(intent);
+                    finish();
+                }
+            });
         });
     }
     public void ShowAddPopup() {
@@ -133,6 +153,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         });
 
         done.setOnClickListener(v -> {
+            Map<String, Store> save = new HashMap<String, Store>();
             String setTitle = titleAdd.getText().toString();
             double setAmount;
             try {
@@ -145,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             String setDetail = descriptionAdd.getText().toString();
             Store store = new Store(setTitle, setAmount, setType, setDetail, setYear, setMonth, setDay);
             data.add(store);
+
             showItem(choseYear, choseMonth, choseDate);
             addDialog.dismiss();
         });

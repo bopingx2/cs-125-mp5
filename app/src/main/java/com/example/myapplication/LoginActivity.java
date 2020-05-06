@@ -34,7 +34,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         if (user != null) {
             Intent intent = new Intent(this, MainActivity.class);
-            intent.putExtra("user", user);
+            String email = user.getEmail();
+            intent.putExtra("user", email);
             startActivity(intent);
             finish();
         } else {
