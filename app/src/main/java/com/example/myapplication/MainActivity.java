@@ -17,6 +17,9 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -31,7 +34,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private int choseYear, choseMonth, choseDate;
     private int setYear, setMonth, setDay;
     private TextView dateChoose, dateAdd;
-    private final String FILE = "data.json";
+    private Intent login = getIntent();
+    //private DocumentReference doc = FirebaseFirestore.getInstance().document("data/" + login.getStringExtra("user"));
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,10 +164,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         receive.setVisibility(View.GONE);
         none.setVisibility((View.VISIBLE));
         boolean empty = true;
-        System.out.println(data.size());
         for (int i = 0; i < data.size(); i++) {
             Store search = data.get(i);
-            System.out.println(search.getType());
             if (search.getYear() == year) {
                 if (search.getMonth() == month) {
                     if (search.getDate() == date) {
@@ -186,6 +188,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             none.setVisibility((View.VISIBLE));
         }
     }
+
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) { }
     public void onNothingSelected(AdapterView<?> arg0) { }
@@ -212,10 +215,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             delete.setOnClickListener(v1 -> {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setMessage("Are you sure to delete?");
-                builder.setPositiveButton("YES", (unused1, unused2) -> data.remove(item));
+                builder.setPositiveButton("YES", (unused1, unused2) -> {
+                    data.remove(item);
+                    addDialog.dismiss();
+                    showItem(this.choseYear, this.choseMonth, this.choseDate);
+                });
                 builder.setNegativeButton("NO", null);
                 builder.create().show();
-                addDialog.dismiss();
             });
 
             addDialog.show();
